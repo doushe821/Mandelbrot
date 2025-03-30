@@ -1,0 +1,14 @@
+#ifndef ERROR_PARSER_H_INCLUDED
+#define ERROR_PARSER_H_INCLUDED
+
+void ErrorParser(const int ErrorCode);
+
+enum ErrorCodes
+{
+    SDL_INITIALISATION_ERROR = -10,
+    SDL_WINDOW_CREATION_FAILURE,
+    SDL_RENDERER_CREATION_FAILURE,
+    SDL_TEXTURE_CREATION_FAILURE,
+};
+
+#endif
