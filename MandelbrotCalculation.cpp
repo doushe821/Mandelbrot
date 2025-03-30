@@ -59,7 +59,6 @@ int* MandelbrotOptimized(int* PixelSet, const int ScreenX, const int ScreenY, co
 
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
-        //yInitial = _mm256_set1_ps((CenterY - yPixels) * step);
         yInitial = _mm256_set1_ps((float)yPixels);
         yInitial = _mm256_sub_ps(CenterY_m256, yInitial);
         yInitial = _mm256_mul_ps(yInitial, step_m256);
@@ -88,7 +87,7 @@ int* MandelbrotOptimized(int* PixelSet, const int ScreenX, const int ScreenY, co
                 __m256 Distance = _mm256_add_ps(xSquare, ySquare);
                 __m256 CmpResult = _mm256_cmp_ps(Distance, BorderRadius_m256, _CMP_LT_OS);
                 int mask = _mm256_movemask_ps(CmpResult);
-                
+
                 if(mask == 0)
                 {
                     break;

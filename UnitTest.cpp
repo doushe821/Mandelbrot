@@ -41,11 +41,14 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
 
     int* PixelSet = (int*)calloc((size_t)(ScreenX * ScreenY), sizeof(int));
 
+    unsigned long long start = 0;
+    unsigned long long end = 0;
+
     for(int i = 0; i < TestNumber; i++)
     {
-        unsigned long long start = _rdtsc();
+        start = _rdtsc();
         MandelbrotRaw(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
-        unsigned long long end = _rdtsc();
+        end = _rdtsc();
 
         unsigned long long DeltaClocks = end - start;
         LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)CPUfrequency;
@@ -65,9 +68,9 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     double RawLatency = (double)ClocksRaw / (double)CPUfrequency;
     double OptimizedLatency = (double)ClocksOptimized / (double)CPUfrequency; 
     fprintf(fpInfo, "%s\nCPU frequency = %llu\nNumber of tests = %d\nShort summary:\nRaw latency = %lg; average raw latency = %lg\n"
-    "Optimized latency = %lg; average optimized latency = %lg\nPerformance increase: %lg%%\n" , 
+    "Optimized latency = %lg; average optimized latency = %lg\nRelative Performance increase: %lg\n" , 
     __TIME__, CPUfrequency, TestNumber, RawLatency, RawLatency / TestNumber,
-    OptimizedLatency, OptimizedLatency / TestNumber, (double)ClocksRaw / (double)ClocksOptimized);
+    OptimizedLatency, OptimizedLatency / TestNumber, (double)ClocksOptimized / (double) ClocksRaw);
 
     char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)TestNumber * 2, sizeof(char*));
     int lastPrinted = 0;
@@ -93,7 +96,8 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     "plt.title('Latency distribution (raw)')\n"
     "plt.xlabel('Latency')\n"
     "plt.ylabel('Quantity')\n"
-    "plt.savefig('histRaw.png', dpi = 300)", DataFileName, TestNumber/2);
+    "plt.savefig('histRaw.png', dpi = 300)", DataFileName, TestNumber);
+
 
     fprintf(fpPlotOptimized, "import matplotlib.pyplot as plt\n\nwith open('%s', 'r') as f:\n"
     "   data = [float(line.strip()) for line in f]\n"
@@ -102,8 +106,8 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     "plt.title('Latency distribution (optimized)')\n"
     "plt.xlabel('Latency')\n"
     "plt.ylabel('Quantity')\n"
-    "plt.savefig('histOptimized.png', dpi = 300)", DataFileName, TestNumber/2 + 1, TestNumber);
-
+    "plt.savefig('histOptimized.png', dpi = 300)", DataFileName, TestNumber + 1, 2 * TestNumber);
+   
 
     free(LatencyDataArrayOptimized);
     free(LatencyDataArrayRaw);

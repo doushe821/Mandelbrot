@@ -10,6 +10,7 @@
 #include "UnitTest.h"
 #include "Visualizer.h"
 #include "ErrorParser.h"
+#include "CMDParser.h"
 
 int main(const int argc, const char** argv)
 {
@@ -24,9 +25,9 @@ int main(const int argc, const char** argv)
     const float BorderCircumferenceRadiusSquare = 3;
     const int CenterX = ScreenX/2;
     const int CenterY = ScreenY/2;
-    const unsigned long long CPU_FREQUENCY = 2000000000;
+    const unsigned long long CPU_FREQUENCY = 3000000000;
 
-    const int TestNumber = 1;
+    const int TestNumber = 1000;
 
     FILE* fpData = fopen("data.dat", "w+b");
     FILE* fpInfo = fopen("info.txt", "w+b");
