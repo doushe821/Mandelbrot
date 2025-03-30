@@ -39,28 +39,28 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     unsigned long long ClocksRaw = 0;
     unsigned long long ClocksOptimized = 0;
 
+    int* PixelSet = (int*)calloc((size_t)(ScreenX * ScreenY), sizeof(int));
+
     for(int i = 0; i < TestNumber; i++)
     {
         unsigned long long start = _rdtsc();
-        int* test = MandelbrotRaw(ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
+        MandelbrotRaw(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
         unsigned long long end = _rdtsc();
 
         unsigned long long DeltaClocks = end - start;
         LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)CPUfrequency;
         ClocksRaw += DeltaClocks;
 
-        free(test);
-
         start = _rdtsc();
-        test = MandelbrotOptimized(ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
+        MandelbrotOptimized(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
         end = _rdtsc();
 
         DeltaClocks = end - start;
         LatencyDataArrayOptimized[i] = (double)(DeltaClocks) / (double)CPUfrequency;
         ClocksOptimized += DeltaClocks; 
-
-        free(test);
     }
+
+    free(PixelSet);
 
     double RawLatency = (double)ClocksRaw / (double)CPUfrequency;
     double OptimizedLatency = (double)ClocksOptimized / (double)CPUfrequency; 
@@ -88,7 +88,7 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
 
     fprintf(fpPlotRaw, "import matplotlib.pyplot as plt\n\nwith open('%s', 'r') as f:\n"
     "   data = [float(line.strip()) for line in f]\n"
-    "\n\nplt.hist(data[1:%d], bins = 20, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
+    "\n\nplt.hist(data[1:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
     "plt.grid(axis='y', linestyle='--')\n"
     "plt.title('Latency distribution (raw)')\n"
     "plt.xlabel('Latency')\n"
@@ -97,7 +97,7 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
 
     fprintf(fpPlotOptimized, "import matplotlib.pyplot as plt\n\nwith open('%s', 'r') as f:\n"
     "   data = [float(line.strip()) for line in f]\n"
-    "\n\nplt.hist(data[%d:%d], bins = 20, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
+    "\n\nplt.hist(data[%d:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
     "plt.grid(axis='y', linestyle='--')\n"
     "plt.title('Latency distribution (optimized)')\n"
     "plt.xlabel('Latency')\n"

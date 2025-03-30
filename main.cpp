@@ -26,7 +26,7 @@ int main(const int argc, const char** argv)
     const int CenterY = ScreenY/2;
     const unsigned long long CPU_FREQUENCY = 2000000000;
 
-    const int TestNumber = 10;
+    const int TestNumber = 1;
 
     FILE* fpData = fopen("data.dat", "w+b");
     FILE* fpInfo = fopen("info.txt", "w+b");
@@ -36,7 +36,9 @@ int main(const int argc, const char** argv)
 
     fclose(fpData);
     fclose(fpInfo);
-    fclose(fpPlotRaw);
+    fclose(fpPlotRaw);  
     fclose(fpPlotOpt);
+
+    DisplayPixelsSDL(ScreenX, ScreenY, N);
     return 0;
 }

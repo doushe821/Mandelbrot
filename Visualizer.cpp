@@ -1,10 +1,12 @@
 #include "Visualizer.h"
 #include "ErrorParser.h"
+#include "MandelbrotCalculation.h"
 
 #include <SDL2/SDL.h>
 
-int DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int MaxN)
+enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int MaxN)
 {
+    float step = 0.003f;
     if(SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         SDL_Log("SDL initialisation error: %s\n", SDL_GetError());
@@ -34,15 +36,32 @@ int DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int MaxN)
         return SDL_RENDERER_CREATION_FAILURE;
     }
 
-  //  SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, ScreenX, ScreenY);
-  //  if(!texture)
-  //  {
-  //      SDL_Log("Failed to create SDL renderer: %s", SDL_GetError());
-  //      SDL_DestroyTexture(texture);
-  //      SDL_DestroyWindow(window);
-  //      SDL_Quit();
-  //      return SDL_TEXTURE_CREATION_FAILURE; 
-  //  }
+    SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, ScreenX, ScreenY);
+    if(!texture)
+    {
+        SDL_Log("Failed to create SDL renderer: %s", SDL_GetError());
+        SDL_DestroyTexture(texture);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return SDL_TEXTURE_CREATION_FAILURE; 
+    }
+
+    const float BorderRadius = 3;
+    const int MoveSpeed = 5;
+    const float ZoomSpeed = 0.0001f;
+    alignas(__m128i) int* PixelSet = (int*)calloc((size_t)(ScreenX * ScreenY), sizeof(int));
+    int CenterX = ScreenX / 2;
+    int CenterY = ScreenY / 2;
+
+    int UpdateFlag = 1;
+
+    if(PixelSet == NULL)
+    {
+        SDL_Log("Failed to create SDL renderer: %s", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return VISUALIZER_ARRAY_ALLOCATION_FAILURE;
+    }
 
     int RunFlag = 1;
     SDL_Event Event = {};
@@ -50,33 +69,104 @@ int DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int MaxN)
     {
         while(SDL_PollEvent(&Event))
         {
-            if(Event.type == SDL_QUIT)
+            //if(Event.type == SDL_QUIT)
+            //{
+            //    RunFlag = 0;
+            //}
+            switch(Event.type)
             {
-                RunFlag = 0;
+                case SDL_QUIT:
+                {
+                    RunFlag = 0;
+                    break;
+                }
+                case SDL_KEYDOWN:
+                {
+                    switch(Event.key.keysym.sym)
+                    {
+                        case SDLK_a:
+                        {
+                            CenterX += MoveSpeed;
+                            UpdateFlag = 1;
+                            break;
+                        }
+                        case SDLK_d:
+                        {
+                            CenterX -= MoveSpeed;
+                            UpdateFlag = 1;
+                            break;
+                        }
+                        case SDLK_w:
+                        {
+                            CenterY += MoveSpeed;
+                            UpdateFlag = 1;
+                            break;
+                        }
+                        case SDLK_s:
+                        {
+                            CenterY -= MoveSpeed;
+                            UpdateFlag = 1;
+                            break;
+                        }
+                        case SDLK_EQUALS:   
+                        {
+                            step -= ZoomSpeed;
+                            float DeltaCenter = (float)CenterX * (step + ZoomSpeed) - (float)CenterX * (step);
+                            CenterX -= (int)((float)DeltaCenter / step);
+                            UpdateFlag = 1;
+                            break;
+                        }
+                        case SDLK_MINUS:
+                        {
+                            step += ZoomSpeed; 
+                            //CenterY += CenterY * step;
+                            UpdateFlag = 1;
+                            break;
+                        }
+                        default:
+                        {
+                            break;
+                        }
+                    }
+                    default:
+                    {
+                        break;
+                    }
+                }
             }
-            
-            //SDL_LockTexture(texture, );
-            //SDL_UpdateTexture(texture, NULL, PixelSet, (size_t)ScreenX * sizeof(*PixelSet));
-            //SDL_RenderClear(renderer);
-            //SDL_RenderCopy(renderer, texture, NULL, NULL);
-            //SDL_RenderPresent(renderer);
 
+            void* TextureBuffer = {};
+            int pitch = 0;
+            SDL_LockTexture(texture, NULL, &TextureBuffer, &pitch);
+
+            if(UpdateFlag)
+            {
+                MandelbrotOptimized(PixelSet, ScreenX, ScreenY, MaxN, step, CenterX, CenterY, BorderRadius);
+            }    
             for(long int i = 0; i < ScreenX * ScreenY; i++)
             {
-                long int x = i % ScreenX;
-                long int y = i / ScreenX; 
-                SDL_SetRenderDrawColor(renderer, 255 - ((Uint8)PixelSet[i] % 255) - (255 - (Uint8)MaxN), (255 - (Uint8)PixelSet[i] % 255)- (255 - (Uint8)MaxN), (255 - (Uint8)PixelSet[i] % 255)- (255 - (Uint8)MaxN), 255);
-                SDL_RenderDrawPoint(renderer, (int)x, (int)y);
+                PixelSet[i] = (255 - ((Uint8)PixelSet[i] % 255) - (255 - (Uint8)MaxN)) + ((255 - ((Uint8)PixelSet[i] % 255) - (255 - (Uint8)MaxN)) << 8) + ((255 - ((Uint8)PixelSet[i] % 255) - (255 - (Uint8)MaxN)) << 16)
+                + ((255 - ((Uint8)PixelSet[i] % 255) - (255 - (Uint8)MaxN)) << 24);
+            }    
+            for(int i = 0; i < ScreenY; i++)
+            {
+                int* dstRow = (int*)((Uint8*)TextureBuffer + i * pitch);
+                memcpy(dstRow, &PixelSet[i * ScreenX], (size_t)ScreenX * sizeof(Uint32));   
             }
+            //SDL_UpdateTexture(texture, NULL, PixelSet, (size_t)ScreenX * sizeof(*PixelSet));
+            SDL_UnlockTexture(texture);
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, texture, NULL, NULL);
             SDL_RenderPresent(renderer);    
+            UpdateFlag = 0;
         }
     }
 
-    //SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     SDL_Quit();
-
-    return 0;
+    free(PixelSet);
+    return VISUALIZER_SUCCESS;
 }

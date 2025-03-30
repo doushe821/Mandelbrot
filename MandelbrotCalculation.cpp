@@ -7,10 +7,8 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
-int* MandelbrotRaw(const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+int* MandelbrotRaw(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
 {
-    int* PixelSet = (int*)calloc((size_t)(ScreenX * ScreenY), sizeof(int));
-    
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
         float Y = ((float)(CenterY - yPixels)) * step;
@@ -41,7 +39,7 @@ int* MandelbrotRaw(const int ScreenX, const int ScreenY, const int ProbeNumber, 
     return PixelSet;
 }
 
-int* MandelbrotOptimized(const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+int* MandelbrotOptimized(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
 {
     __m256 xSquare = {};
     __m256 ySquare = {};
@@ -57,7 +55,6 @@ int* MandelbrotOptimized(const int ScreenX, const int ScreenY, const int ProbeNu
 
     __m256 Const2_m256 = _mm256_set1_ps(2);
     __m256 BorderRadius_m256 = _mm256_set1_ps(BorderRadius);
-    alignas(__m256i) int* PixelSet = (int*)calloc((size_t)(ScreenX * ScreenY), sizeof(int));
     __m256 ZeroToThreeConstants_m256 = _mm256_set_ps(7, 6, 5, 4, 3, 2, 1, 0);
 
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
@@ -69,7 +66,6 @@ int* MandelbrotOptimized(const int ScreenX, const int ScreenY, const int ProbeNu
         
         for(int xPixels = 0; xPixels < ScreenX; xPixels += 8)
         {
-            //xCurrent = _mm256_set_ps((float)(xPixels - CenterX) * step, (float)(xPixels + 1 - CenterX) * step, (float)(xPixels + 2 - CenterX) * step, (float)(xPixels + 3 - CenterX) * step);
             xCurrent = _mm256_set1_ps((float)xPixels);
             xCurrent = _mm256_add_ps(xCurrent, ZeroToThreeConstants_m256);
             xCurrent = _mm256_sub_ps(xCurrent, CenterX_m256);
@@ -92,6 +88,7 @@ int* MandelbrotOptimized(const int ScreenX, const int ScreenY, const int ProbeNu
                 __m256 Distance = _mm256_add_ps(xSquare, ySquare);
                 __m256 CmpResult = _mm256_cmp_ps(Distance, BorderRadius_m256, _CMP_LT_OS);
                 int mask = _mm256_movemask_ps(CmpResult);
+                
                 if(mask == 0)
                 {
                     break;
