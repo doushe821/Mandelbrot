@@ -166,16 +166,14 @@ Number of tests = 1000
 Short summary:
 Raw latency = 60.7409; average raw latency = 0.0607409
 Optimized latency = 8.5966; average optimized latency = 0.0085966
-Performance increase: 7.06139
+Relative Performance increase: 7.06139
 ```
 
 Гистограммы: 
 
-![](READMEImages/histRaw.png)
-
-![](READMEImages/histOptimized.png)
-
 Посчитаем случайную погрешность: $\sigma = \sqrt{\frac{\sum x_{m}^2-x_i^2}{N(N-1)}}$
+![](READMEImages/histoRaw.png)]
+![](READMEImages/histoOptimized.png)
 
 $\sigma_{raw}=1\cdot 10^{-5}$
 
@@ -183,6 +181,7 @@ $\sigma_{opt}=9\cdot 10^{-5}$
 
 Значения задержки:
 $L_{Raw}=(0.06074\pm0.00009)$ с
+
 $L_{Raw}=(0.00860\pm0.00001)$ с
 
 ## Выводы
