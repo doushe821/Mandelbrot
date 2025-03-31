@@ -46,7 +46,7 @@ enum TestExitCode UnitTest(RunParameters params, FILE* fpData, const char* DataF
 
     for(int i = 0; i < params.TestNumber; i++)
     {
-        start = _rdtsc();
+        start = _rdtsc(); 
         MandelbrotRaw(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
         end = _rdtsc();
 

@@ -11,7 +11,7 @@ CFLAGS= -O2 -std=c++14 -mavx2 \
 CFLAGS_RELEASE=-D _NDEBUG
 LFLAGS= -lSDL2 
 
-SOURCES=main.cpp MandelbrotCalculation.cpp UnitTest.cpp Visualizer.cpp
+SOURCES=main.cpp MandelbrotCalculation.cpp UnitTest.cpp Visualizer.cpp ErrorParser.cpp CMDParser.cpp
 OBJECTS:=$(addprefix $(OUT_O_DIR)/,$(SOURCES:.cpp=.o))
 DEPS=$(OBJECTS:.o=.d)
 

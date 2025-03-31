@@ -153,7 +153,7 @@ enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int
                 int* dstRow = (int*)((Uint8*)TextureBuffer + i * pitch);
                 memcpy(dstRow, &PixelSet[i * ScreenX], (size_t)ScreenX * sizeof(Uint32));   
             }
-            //SDL_UpdateTexture(texture, NULL, PixelSet, (size_t)ScreenX * sizeof(*PixelSet));
+            //SDL_UpdateTexture(texture, NULL, PixelSet, (size_t)ScreenX * sizeof(int));
             SDL_UnlockTexture(texture);
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -168,5 +168,5 @@ enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     SDL_Quit();
     free(PixelSet);
-    return VISUALIZER_SUCCESS;
+    return MODULE_SUCCESS;
 }

@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "RunParametersStruct.h"
+#include "ErrorParser.h"
+
 __attribute((unused)) static const int NUMBER_OF_COMMANDS = 7;
 
 struct flags_t
@@ -41,7 +44,8 @@ static const option options[NUMBER_OF_COMMANDS]
 
 };
 
-int ParseCMD(const int argc, const char** argv, flags_t* flags);
+enum ErrorCodes InitParams(flags_t CMDFlags, RunParameters* params);
+enum ErrorCodes ParseCMD(int argc, char** argv, flags_t* flags);
 
 __attribute((unused)) static const char* HELP_MESSAGE = "This program calculates Mandelbrot set and is cool\n";
 __attribute((unused)) static const char* UNKNOWN_COMMAND_MESSAGE = "Unknown option, it will be ignored\n";
