@@ -22,8 +22,7 @@ LFLAGS= -lSDL2
 
 TARGET = release
 ifeq ($(TARGET), release)
-	CFLAGS=-O2 -ffast-math -mavx2 \
-	-fsanitize=null
+	CFLAGS=-O2 -ffast-math -mavx2 -flto\
 else
 	CFLAGS=-O2 -ffast-math -mavx2 \
 	-ggdb3 -std=c++17 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \

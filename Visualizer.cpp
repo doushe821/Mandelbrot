@@ -120,7 +120,6 @@ enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int
                             step += ZoomSpeed; 
                             float DeltaCenter = (float)CenterY * (step + ZoomSpeed) - (float)CenterY * (step);
                             CenterY -= (int)((float)DeltaCenter / step);
-                            //CenterY += CenterY * step;
                             UpdateFlag = 1;
                             break;
                         }

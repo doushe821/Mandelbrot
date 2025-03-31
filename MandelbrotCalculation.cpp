@@ -15,9 +15,9 @@ enum ErrorCodes MandelbrotNaive(int* PixelSet, const int ScreenX, const int Scre
     {
         float Y = ((float)(CenterY - yPixels)) * step;
         float y0 = Y;
-        // TODO Functions to increase readability
+        // TODO Functions to increase readability 
         // TODO add -ffast-math DONE
-        // TODO linktime optimizations (to inline functions from different modules)
+        // TODO linktime optimizations (to inline functions from different modules) DONE
         for(int xPixels = 0; xPixels < ScreenX; xPixels++)
         {
         
@@ -118,7 +118,56 @@ enum ErrorCodes MandelbrotIntrinsics(int* PixelSet, const int ScreenX, const int
     return MODULE_SUCCESS;   
 }
 
-// © Dr. Iyaitsa
+enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+{ 
+    float Y[4] = {};
+    float X[4] = {};
+    float x0[4] = {};
+    float xx[4] = {};
+    float yy[4] = {};
+    float xy[4] = {};
 
-// "Где я..."
-// © Pr. Penis
+    
+    for(int yPixels = 0; yPixels < ScreenY; yPixels++)
+    {
+        float y0 = ((float)(CenterY - yPixels)) * step;
+
+        for(int xPixels = 0; xPixels < ScreenX; xPixels += 4)
+        {
+            int mask[4] = {1, 1, 1, 1};
+            for(int i = 0; i < 4; i++) X[i] = ((float)(xPixels - CenterX + i)) * step;
+            for(int i = 0; i < 4; i++) Y[i] = y0;
+            for(int i = 0; i < 4; i++) x0[i] = X[i];
+
+            for(int j = 0; j < ProbeNumber; j++)
+            {
+                for(int i = 0; i < 4; i++) xx[i] = X[i] * X[i];
+                //float xx = X*X;
+                for(int i = 0; i < 4; i++) yy[i] = Y[i] * Y[i];
+                //float yy = Y*Y;
+                for(int i = 0; i < 4; i++) xy[i] = X[i] * Y[i];
+                //float xy = X*Y;
+
+                for(int i = 0; i < 4; i++)
+                {
+                    if(xx[i] + yy[i] > BorderRadius)
+                    {
+                        mask[i] = 0;
+                    }
+                    else
+                    {
+                        PixelSet[ScreenX * yPixels + xPixels + i] += 1;
+                    }
+                }
+                if((mask[0] + mask[1] + mask[2] + mask[3]) == 0)
+                {
+                    break;
+                }
+
+                for(int i = 0; i < 4; i++) X[i] = xx[i] - yy[i] + x0[i];
+                for(int i = 0; i < 4; i++) Y[i] = 2 * xy[i] + y0;
+            }
+        }
+    }
+    return MODULE_SUCCESS;
+}

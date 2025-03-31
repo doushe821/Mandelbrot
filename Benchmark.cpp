@@ -37,9 +37,24 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
         return ZERO_CPU_FREQUENCY;
     }
     double* LatencyDataArrayRaw = (double*)calloc((size_t)params.TestNumber, sizeof(double));
+    if(LatencyDataArrayRaw == NULL)
+    {
+        return ALLOCATION_FAILURE;
+    }
     double* LatencyDataArrayOptimized = (double*)calloc((size_t)params.TestNumber, sizeof(double));
+    if(LatencyDataArrayOptimized == NULL)
+    {
+        return ALLOCATION_FAILURE;
+    }
+    double* LatencyDataArrayArrays = (double*)calloc((size_t)params.TestNumber, sizeof(double));
+    if(LatencyDataArrayArrays == NULL)
+    {
+        return ALLOCATION_FAILURE;  
+    }
+
     unsigned long long ClocksRaw = 0;
     unsigned long long ClocksOptimized = 0;
+    unsigned long long ClocksArrays = 0;
 
     int32_t* PixelSet = (int*)calloc((size_t)(params.ScreenX * params.ScreenY), sizeof(int));
 
@@ -63,17 +78,27 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
         DeltaClocks = end - start;
         LatencyDataArrayOptimized[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
         ClocksOptimized += DeltaClocks; 
+
+
+        start = _rdtsc();
+        MandelbrotArrays(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
+        end = _rdtsc();
+
+        DeltaClocks = end - start;
+        LatencyDataArrayArrays[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
+        ClocksArrays += DeltaClocks; 
     }
 
     free(PixelSet);
 
     double RawLatency = (double)ClocksRaw / (double)params.CPUFrequency;
     double OptimizedLatency = (double)ClocksOptimized / (double)params.CPUFrequency; 
-    
-    fprintf(fpInfo, "%s\nCPU frequency = %llu\nNumber of tests = %d\nNumber of probes for each dot: %d\nShort summary:\nRaw latency = %lg; average raw latency = %lg\n"
-    "Optimized latency = %lg; average optimized latency = %lg\nRelative Performance increase: %lg\n" , 
+    double ArraysLatency = (double)ClocksArrays / (double)params.CPUFrequency; 
+
+    fprintf(fpInfo, "%s\nCPU frequency = %llu\nNumber of tests = %d\nNumber of probes for each dot: %d\nShort summary:\nNaive latency = %lg; average naive latency = %lg\n"
+    "Optimized latency = %lg; average optimized latency = %lg\nRelative Performance increase: %lg\nArrays latency: %lg\n" , 
     __TIME__, params.CPUFrequency, params.TestNumber, params.ProbeNumber, RawLatency, RawLatency / params.TestNumber,
-    OptimizedLatency, OptimizedLatency / params.TestNumber, (double)ClocksRaw / (double)ClocksOptimized);
+    OptimizedLatency, OptimizedLatency / params.TestNumber, (double)ClocksRaw / (double)ClocksOptimized, ArraysLatency);
 
     char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)params.TestNumber * 2, sizeof(char*));
     int lastPrinted = 0;
@@ -112,6 +137,7 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
 
     free(LatencyDataArrayOptimized);
     free(LatencyDataArrayRaw);
+    free(LatencyDataArrayArrays);
 
     return MODULE_SUCCESS;
 }

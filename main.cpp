@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     {
         ErrorParser(FileNamesInit(&params));
 
-        if(system("mkdir Plots") != 0)
+        if(system("mkdir -p Plots") != 0)
         {
             ErrorParser(SYSTEM_FUNCTION_CALL_FAILURE);
         }
