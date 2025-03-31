@@ -1,4 +1,4 @@
-#include "UnitTest.h"
+#include "UnitTestEdited.h"
 
 #include "MandelbrotCalculation.h"
 
@@ -10,7 +10,7 @@
 const int MAX_DATA_STRING_LENGTH = 10;
 
 
-enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized)
+enum ErrorCodes UnitTestEdited(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized, FILE* MainData)
 {
     if(fpData == NULL)
     {
@@ -109,6 +109,7 @@ enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE*
     "plt.ylabel('Quantity')\n"
     "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber + 1, 2 * params.TestNumber, params.OptimizedPlotFname);
    
+    fprintf(MainData, "%d, %f\n", params.ProbeNumber,  (double)ClocksRaw / (double)ClocksOptimized);
 
     free(LatencyDataArrayOptimized);
     free(LatencyDataArrayRaw);

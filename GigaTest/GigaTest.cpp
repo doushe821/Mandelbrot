@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 
 #include "MandelbrotCalculation.h"
-#include "UnitTest.h"
+#include "UnitTestEdited.h"
 #include "Visualizer.h"
 #include "ErrorParser.h"
 #include "CMDParser.h"
@@ -21,13 +21,13 @@ int main(int argc, char** argv)
     ErrorParser(ParseCMD(argc, argv, &CMDFlags));
     ErrorParser(InitParams(CMDFlags, &params));
 
-    #ifndef NDEBUG
-    printf("Using run parameters:\n");
-    printf("Border radius = %f\nCenterX = %d\nCenterY = %d\nCPU frequency = %llu\nGraphics = %d\nProbe number = %d\nScreenX = %d\nScreenY = %d\nStep = %f\nTest number = %d\n", params.BorderRadius, params.CenterX, params.CenterY, params.CPUFrequency, params.GraphicsFlag, params.ProbeNumber, params.ScreenX, params.ScreenY, params.step, params.TestNumber);
-    #endif
+    FILE* MainData = fopen("GTestData.csv", "w+b");
 
-    if(params.TestNumber > 0)
+    const int TestsNumber = 20;
+    params.TestNumber = 200;
+    for(int i = 0; i < 20; i++)
     {
+        params.ProbeNumber = 50 + i * 50;
         ErrorParser(FileNamesInit(&params));
 
         if(system("mkdir Plots") != 0)
@@ -40,16 +40,12 @@ int main(int argc, char** argv)
         FILE* fpPlotRaw = fopen(params.RawPyFname, "w+b");
         FILE* fpPlotOpt = fopen(params.OptimizedPyFname, "w+b");
         
-        ErrorParser(UnitTest(params, fpData, fpInfo, fpPlotRaw, fpPlotOpt));
+        ErrorParser(UnitTestEdited(params, fpData, fpInfo, fpPlotRaw, fpPlotOpt, MainData));
 
         fclose(fpData);
         fclose(fpInfo);
         fclose(fpPlotRaw);  
         fclose(fpPlotOpt);
-    }
-    if(params.GraphicsFlag)
-    {
-        ErrorParser(DisplayPixelsSDL(params.ScreenX, params.ScreenY, params.ProbeNumber));
     }
 
     return 0;

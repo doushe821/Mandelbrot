@@ -151,7 +151,7 @@ enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int
             }    
             for(long int i = 0; i < ScreenX * ScreenY; i++)
             {
-                Uint8 red = ((Uint8)((Uint8)MaxN - (Uint8)PixelSet[i]) % 255) * 2;
+                Uint8 red = ((Uint8)((Uint8)MaxN - (Uint8)PixelSet[i]) % 255) * 2 + i;
                 Uint8 green = (Uint8)((Uint8)MaxN - (Uint8)PixelSet[i]) % 255;
                 Uint8 blue = (Uint8)((Uint8)MaxN - (Uint8)PixelSet[i]) % 255;
                 PixelsRGB[i] = red + (green << 8) + (blue << 16) + (255 << 24);

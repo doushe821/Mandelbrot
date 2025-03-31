@@ -1,7 +1,7 @@
 #include "ErrorParser.h"
 
 #include <stdio.h>
-void ErrorParser(const int ErrorCode) 
+void ErrorParser(const int ErrorCode)
 {
     switch(ErrorCode)
     {
