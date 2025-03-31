@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include "RunParametersStruct.h"
+
 enum TestExitCode
 {
     TEST_SUCCESS = 0,
@@ -15,6 +17,6 @@ enum TestExitCode
     SYSTEM_FUNCTION_CALL_FAILURE = -7,
 
 };
-enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius, const int TestNumber, const unsigned long long CPUfrequency, FILE* fpData, const char* DataFileName, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized);
+enum TestExitCode UnitTest(RunParameters params, FILE* fpData, const char* DataFileName, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized);
 
 #endif

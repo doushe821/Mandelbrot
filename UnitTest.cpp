@@ -8,7 +8,7 @@
 #include <x86intrin.h>
 
 const int MAX_DATA_STRING_LENGTH = 10;
-enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius, const int TestNumber, const unsigned long long CPUfrequency, FILE* fpData, const char* DataFileName, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized)
+enum TestExitCode UnitTest(RunParameters params, FILE* fpData, const char* DataFileName, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized)
 {
     if(fpData == NULL)
     {
@@ -26,59 +26,59 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     {
         return FP_PLOT_OPTIMIZED_NULL;
     }
-    if(TestNumber == 0)
+    if(params.TestNumber == 0)
     {
         return ZERO_TEST_NUMBER;
     }
-    if(CPUfrequency == 0)
+    if(params.CPUFrequency == 0)
     {
         return ZERO_CPU_FREQUENCY;
     }
-    double* LatencyDataArrayRaw = (double*)calloc((size_t)TestNumber, sizeof(double));
-    double* LatencyDataArrayOptimized = (double*)calloc((size_t)TestNumber, sizeof(double));
+    double* LatencyDataArrayRaw = (double*)calloc((size_t)params.TestNumber, sizeof(double));
+    double* LatencyDataArrayOptimized = (double*)calloc((size_t)params.TestNumber, sizeof(double));
     unsigned long long ClocksRaw = 0;
     unsigned long long ClocksOptimized = 0;
 
-    int* PixelSet = (int*)calloc((size_t)(ScreenX * ScreenY), sizeof(int));
+    int* PixelSet = (int*)calloc((size_t)(params.ScreenX * params.ScreenY), sizeof(int));
 
     unsigned long long start = 0;
     unsigned long long end = 0;
 
-    for(int i = 0; i < TestNumber; i++)
+    for(int i = 0; i < params.TestNumber; i++)
     {
         start = _rdtsc();
-        MandelbrotRaw(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
+        MandelbrotRaw(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
         end = _rdtsc();
 
         unsigned long long DeltaClocks = end - start;
-        LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)CPUfrequency;
+        LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
         ClocksRaw += DeltaClocks;
 
         start = _rdtsc();
-        MandelbrotOptimized(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
+        MandelbrotOptimized(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
         end = _rdtsc();
 
         DeltaClocks = end - start;
-        LatencyDataArrayOptimized[i] = (double)(DeltaClocks) / (double)CPUfrequency;
+        LatencyDataArrayOptimized[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
         ClocksOptimized += DeltaClocks; 
     }
 
     free(PixelSet);
 
-    double RawLatency = (double)ClocksRaw / (double)CPUfrequency;
-    double OptimizedLatency = (double)ClocksOptimized / (double)CPUfrequency; 
+    double RawLatency = (double)ClocksRaw / (double)params.CPUFrequency;
+    double OptimizedLatency = (double)ClocksOptimized / (double)params.CPUFrequency; 
     fprintf(fpInfo, "%s\nCPU frequency = %llu\nNumber of tests = %d\nShort summary:\nRaw latency = %lg; average raw latency = %lg\n"
     "Optimized latency = %lg; average optimized latency = %lg\nRelative Performance increase: %lg\n" , 
-    __TIME__, CPUfrequency, TestNumber, RawLatency, RawLatency / TestNumber,
-    OptimizedLatency, OptimizedLatency / TestNumber, (double)ClocksOptimized / (double) ClocksRaw);
+    __TIME__, params.CPUFrequency, params.TestNumber, RawLatency, RawLatency / params.TestNumber,
+    OptimizedLatency, OptimizedLatency / params.TestNumber, (double)ClocksOptimized / (double) ClocksRaw);
 
-    char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)TestNumber * 2, sizeof(char*));
+    char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)params.TestNumber * 2, sizeof(char*));
     int lastPrinted = 0;
-    for(int i = 0; i < TestNumber; i++)
+    for(int i = 0; i < params.TestNumber; i++)
     {
         lastPrinted += sprintf(DataBuffer + lastPrinted, "%.6lg\n",LatencyDataArrayRaw[i]);
     }
-    for(int i = 0; i < TestNumber; i++)
+    for(int i = 0; i < params.TestNumber; i++)
     {
         lastPrinted += sprintf(DataBuffer + lastPrinted, "%.6lg\n", LatencyDataArrayOptimized[i]);
     }
@@ -96,7 +96,7 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     "plt.title('Latency distribution (raw)')\n"
     "plt.xlabel('Latency')\n"
     "plt.ylabel('Quantity')\n"
-    "plt.savefig('histRaw.png', dpi = 300)", DataFileName, TestNumber);
+    "plt.savefig('histRaw.png', dpi = 300)", DataFileName, params.TestNumber);
 
 
     fprintf(fpPlotOptimized, "import matplotlib.pyplot as plt\n\nwith open('%s', 'r') as f:\n"
@@ -106,7 +106,7 @@ enum TestExitCode UnitTest(const int ScreenX, const int ScreenY, const int Probe
     "plt.title('Latency distribution (optimized)')\n"
     "plt.xlabel('Latency')\n"
     "plt.ylabel('Quantity')\n"
-    "plt.savefig('histOptimized.png', dpi = 300)", DataFileName, TestNumber + 1, 2 * TestNumber);
+    "plt.savefig('histOptimized.png', dpi = 300)", DataFileName, params.TestNumber + 1, 2 * params.TestNumber);
    
 
     free(LatencyDataArrayOptimized);

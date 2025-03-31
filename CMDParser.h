@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-__attribute((unused)) static const int NUMBER_OF_COMMANDS = 6;
+__attribute((unused)) static const int NUMBER_OF_COMMANDS = 7;
 
 struct flags_t
 {
@@ -23,6 +23,7 @@ struct flags_t
 
     bool isTest;
     int TestNumber;
+    unsigned long long CPUFrequency;
 
     bool isStep;
     float step;
@@ -36,12 +37,13 @@ static const option options[NUMBER_OF_COMMANDS]
     {"graphics" , no_argument, NULL, 'g'},
     {"test" , required_argument, NULL, 't'},
     {"step", required_argument, NULL, 's'},
+    {"frequency", required_argument, NULL, 'f'},
 
 };
 
 int ParseCMD(const int argc, const char** argv, flags_t* flags);
 
-__attribute((unused)) static const char* HELP_MESSAGE = "This programm can differentiate mathematical expressions\n-o is a flag that is used set output .dot file name,\n";
+__attribute((unused)) static const char* HELP_MESSAGE = "This program calculates Mandelbrot set and is cool\n";
 __attribute((unused)) static const char* UNKNOWN_COMMAND_MESSAGE = "Unknown option, it will be ignored\n";
 __attribute((unused)) static const char* MISSING_ARGUMENT = "Option missing argument, it will be set to default or ignored\n";
 __attribute((unused)) static const char* PARSER_FAILURE = "Command line options parser failed\n";

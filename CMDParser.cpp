@@ -3,7 +3,7 @@
 
 #include "CMDParser.h"
 
-int parsecmd(int argc, char** argv, flags_t* flags)
+int ParseCMD(int argc, char** argv, flags_t* flags)
 {
     if(argc <= 2)
     {
@@ -55,6 +55,10 @@ int parsecmd(int argc, char** argv, flags_t* flags)
                 {
                     flags->isStep = true;
                     flags->step = (float)atof(optarg);
+                }
+                case 'f':
+                {
+                    flags->CPUFrequency = (unsigned long long)atoll(optarg);
                 }
                 case '?':
                 {
