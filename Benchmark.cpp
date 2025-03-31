@@ -1,4 +1,4 @@
-#include "UnitTest.h"
+#include "Benchmark.h"
 
 #include "MandelbrotCalculation.h"
 
@@ -10,7 +10,7 @@
 const int MAX_DATA_STRING_LENGTH = 10;
 
 
-enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized)
+enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized)
 {
     if(fpData == NULL)
     {
@@ -41,7 +41,7 @@ enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE*
     unsigned long long ClocksRaw = 0;
     unsigned long long ClocksOptimized = 0;
 
-    int* PixelSet = (int*)calloc((size_t)(params.ScreenX * params.ScreenY), sizeof(int));
+    int32_t* PixelSet = (int*)calloc((size_t)(params.ScreenX * params.ScreenY), sizeof(int));
 
     unsigned long long start = 0;
     unsigned long long end = 0;
@@ -49,7 +49,7 @@ enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE*
     for(int i = 0; i < params.TestNumber; i++)
     {
         start = _rdtsc(); 
-        MandelbrotRaw(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
+        MandelbrotNaive(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
         end = _rdtsc();
 
         unsigned long long DeltaClocks = end - start;
@@ -57,7 +57,7 @@ enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE*
         ClocksRaw += DeltaClocks;
 
         start = _rdtsc();
-        MandelbrotOptimized(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
+        MandelbrotIntrinsics(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
         end = _rdtsc();
 
         DeltaClocks = end - start;

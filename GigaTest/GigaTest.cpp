@@ -25,15 +25,14 @@ int main(int argc, char** argv)
 
     const int TestsNumber = 20;
     params.TestNumber = 200;
-    for(int i = 0; i < 20; i++)
+    if(system("mkdir Plots") != 0)
+    {
+        ErrorParser(SYSTEM_FUNCTION_CALL_FAILURE);
+    }
+    for(int i = 0; i < TestsNumber; i++)
     {
         params.ProbeNumber = 50 + i * 50;
         ErrorParser(FileNamesInit(&params));
-
-        if(system("mkdir Plots") != 0)
-        {
-            ErrorParser(SYSTEM_FUNCTION_CALL_FAILURE);
-        }
 
         FILE* fpData = fopen(params.DataFnameFullPath, "w+b");
         FILE* fpInfo = fopen(params.InfoFnameFullPath, "w+b");

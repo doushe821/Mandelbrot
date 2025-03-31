@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 
-enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int MaxN)
+enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int MaxN) // TODO FPS meter
 {
     float step = 0.003f;
     if(SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -70,10 +70,6 @@ enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int
     {
         while(SDL_PollEvent(&Event))
         {
-            //if(Event.type == SDL_QUIT)
-            //{
-            //    RunFlag = 0;
-            //}
             switch(Event.type)
             {
                 case SDL_QUIT:
@@ -147,7 +143,7 @@ enum ErrorCodes DisplayPixelsSDL(const int ScreenX, const int ScreenY, const int
 
             if(UpdateFlag)
             {
-                MandelbrotOptimized(PixelSet, ScreenX, ScreenY, MaxN, step, CenterX, CenterY, BorderRadius);
+                MandelbrotIntrinsics(PixelSet, ScreenX, ScreenY, MaxN, step, CenterX, CenterY, BorderRadius);
             }    
             for(long int i = 0; i < ScreenX * ScreenY; i++)
             {

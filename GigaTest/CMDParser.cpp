@@ -3,6 +3,8 @@
 
 #include "CMDParser.h"
 
+static char* itoa(int num, char* string);
+
 enum ErrorCodes ParseCMD(int argc, char** argv, flags_t* flags)
 {
     if(argc < 2)
@@ -155,4 +157,66 @@ enum ErrorCodes InitParams(flags_t CMDFlags, RunParameters* params)
 
 
     return MODULE_SUCCESS;
+}
+
+enum ErrorCodes FileNamesInit(RunParameters* params)
+{
+    char txtExt[5] = ".txt";
+    char pyExt[4] = ".py";
+    char datExt[5] = ".dat"; 
+    char InfoFname[MANDELBROT_FILENAME_MAX] = "info";
+    char DataFname[MANDELBROT_FILENAME_MAX] = "data";
+
+    char DataFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+    char InfoFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+
+    char pnString[MAX_PROBE_NUMBER_DIGITS] = {};
+    itoa(params->ProbeNumber, pnString);
+
+    char RawFname[MANDELBROT_FILENAME_MAX] = "histRaw";
+    char OptFname[MANDELBROT_FILENAME_MAX] = "histOptimized";
+
+    char RawFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+    char OptFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+
+
+    strcat(InfoFname, pnString);
+    strcat(DataFname, pnString);
+
+    strncpy(params->InfoFname, InfoFname, MANDELBROT_FILENAME_MAX);
+    strncpy(params->DataFname, DataFname, MANDELBROT_FILENAME_MAX);
+
+    strcat(DataFP, DataFname);
+    strcat(InfoFP, InfoFname);
+    strcat(DataFP, datExt);
+    strcat(InfoFP, txtExt);
+
+    strncpy(params->DataFnameFullPath, DataFP, MANDELBROT_FILENAME_MAX);
+    strncpy(params->InfoFnameFullPath, InfoFP, MANDELBROT_FILENAME_MAX);
+
+    strcat(RawFP, RawFname);
+    strcat(RawFP, pnString);
+    strcat(RawFP, pyExt);
+
+    strcat(OptFP, OptFname);
+    strcat(OptFP, pnString);
+    strcat(OptFP, pyExt);
+
+    strncpy(params->OptimizedPyFname, OptFP, MANDELBROT_FILENAME_MAX);
+    strncpy(params->RawPyFname, RawFP, MANDELBROT_FILENAME_MAX);
+
+    strcat(RawFname, pnString);
+    strcat(OptFname, pnString);
+
+    strncpy(params->RawPlotFname, RawFname, MANDELBROT_FILENAME_MAX);
+    strncpy(params->OptimizedPlotFname, OptFname, MANDELBROT_FILENAME_MAX);
+
+    return MODULE_SUCCESS;
+
+}
+
+static char* itoa(int num, char* string)
+{
+    sprintf(string, "%d", num);
+    return string;
 }

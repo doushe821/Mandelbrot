@@ -7,14 +7,20 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
-int* MandelbrotRaw(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
-{
+#include "ErrorParser.h"
+
+enum ErrorCodes MandelbrotNaive(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+{ // TODO Rename to naive and change return value  DONE
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
         float Y = ((float)(CenterY - yPixels)) * step;
         float y0 = Y;
+        // TODO Functions to increase readability
+        // TODO add -ffast-math DONE
+        // TODO linktime optimizations (to inline functions from different modules)
         for(int xPixels = 0; xPixels < ScreenX; xPixels++)
         {
+        
             float X = ((float)(xPixels - CenterX)) * step;
             Y = ((float)(CenterY - yPixels)) * step;
             float x0 = X;
@@ -36,10 +42,10 @@ int* MandelbrotRaw(int* PixelSet, const int ScreenX, const int ScreenY, const in
             PixelSet[yPixels * ScreenX + xPixels] = Iterations;
         }
     }
-    return PixelSet;
+    return MODULE_SUCCESS;
 }
 
-int* MandelbrotOptimized(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+enum ErrorCodes MandelbrotIntrinsics(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
 {
     __m256 xSquare = {};
     __m256 ySquare = {};
@@ -104,13 +110,12 @@ int* MandelbrotOptimized(int* PixelSet, const int ScreenX, const int ScreenY, co
                 xy = _mm256_mul_ps(xy, Const2_m256);
                 yCurrent = _mm256_add_ps(xy, yInitial);
             }
-
             // Copying N values to PixelSet
-            //*((__m256i*)(PixelSet + yPixels * ScreenX + xPixels)) = *((__m256i*)(ProbeQuantity));
-            memcpy(PixelSet + yPixels * ScreenX + xPixels, &ProbeQuantity, sizeof(int) * 8);
+            //*((__m256i*)(PixelSet + yPixels * ScreenX + xPixels)) = ProbeQuantity;
+            memcpy(PixelSet + yPixels * ScreenX + xPixels, &ProbeQuantity, sizeof(int) * 8); // TODO aligned alloc
         }
     }
-    return PixelSet;   
+    return MODULE_SUCCESS;   
 }
 
 // © Dr. Iyaitsa

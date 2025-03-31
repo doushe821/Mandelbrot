@@ -6,6 +6,6 @@
 #include "RunParametersStruct.h"
 #include "ErrorParser.h"
 
-enum ErrorCodes UnitTest(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized);
+enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized);
 
 #endif
