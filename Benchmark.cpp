@@ -56,7 +56,12 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     unsigned long long ClocksOptimized = 0;
     unsigned long long ClocksArrays = 0;
 
-    int32_t* PixelSet = (int*)calloc((size_t)(params.ScreenX * params.ScreenY), sizeof(int));
+    size_t ScreenArea = (size_t)params.ScreenX * (size_t)params.ScreenY;
+    if((ScreenArea % sizeof(__m256i)) != 0)
+    {
+        ScreenArea += sizeof(__m256i) - ScreenArea % sizeof(__m256i);
+    }
+    int32_t* PixelSet = (int*)aligned_alloc(sizeof(__m256i), (size_t)params.ScreenX * (size_t)params.ScreenY * sizeof(int));
 
     unsigned long long start = 0;
     unsigned long long end = 0;

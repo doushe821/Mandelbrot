@@ -29,8 +29,7 @@ enum ErrorCodes ParseCMD(int argc, char** argv, flags_t* flags)
                 {
                     flags->isDimensions = true;
                     flags->ScreenX = atoi(optarg);
-                    flags->ScreenY = atoi(optarg);
-                    optid++;
+                    flags->ScreenY = atoi(optarg + strlen(optarg) + 1);
                     break;
                 }
                 case 'n':

@@ -7,9 +7,11 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
+#include "Visualizer.h"
 #include "ErrorParser.h"
 
-enum ErrorCodes MandelbrotNaive(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+enum ErrorCodes MandelbrotNaive(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber,
+                                float step, int CenterX, int CenterY, const float BorderRadius)
 { // TODO Rename to naive and change return value  DONE
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
@@ -45,7 +47,8 @@ enum ErrorCodes MandelbrotNaive(int* PixelSet, const int ScreenX, const int Scre
     return MODULE_SUCCESS;
 }
 
-enum ErrorCodes MandelbrotIntrinsics(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+enum ErrorCodes MandelbrotIntrinsics(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber,
+                                     float step, int CenterX, int CenterY, const float BorderRadius)
 {
     __m256 xSquare = {};
     __m256 ySquare = {};
@@ -112,13 +115,14 @@ enum ErrorCodes MandelbrotIntrinsics(int* PixelSet, const int ScreenX, const int
             }
             // Copying N values to PixelSet
             //*((__m256i*)(PixelSet + yPixels * ScreenX + xPixels)) = ProbeQuantity;
-            memcpy(PixelSet + yPixels * ScreenX + xPixels, &ProbeQuantity, sizeof(int) * 8); // TODO aligned alloc
+            memcpy(PixelSet + yPixels * ScreenX + xPixels, &ProbeQuantity, sizeof(int) * 8); // TODO aligned alloc DONE
         }
     }
     return MODULE_SUCCESS;   
 }
 
-enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber, float step, int CenterX, int CenterY, const float BorderRadius)
+enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber,
+                                 float step, int CenterX, int CenterY, const float BorderRadius)
 { 
     float Y[4] = {};
     float X[4] = {};
@@ -127,7 +131,6 @@ enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int Scr
     float yy[4] = {};
     float xy[4] = {};
 
-    
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
         float y0 = ((float)(CenterY - yPixels)) * step;
@@ -159,6 +162,7 @@ enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int Scr
                         PixelSet[ScreenX * yPixels + xPixels + i] += 1;
                     }
                 }
+
                 if((mask[0] + mask[1] + mask[2] + mask[3]) == 0)
                 {
                     break;
@@ -169,5 +173,6 @@ enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int Scr
             }
         }
     }
+    //DisplayPixelsSDL(ScreenX, ScreenY, ProbeNumber);
     return MODULE_SUCCESS;
 }
