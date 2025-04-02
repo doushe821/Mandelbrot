@@ -235,9 +235,10 @@ Arrays latency: 60.2322
 ```
 
 Гистограммы: 
-![](READMEImages.png/histNaive400.png)
-![](READMEImages.png/histOptimized400.png)
-![](READMEImages.png/histArrays400.png)
+![](READMEImages/histNaive400.png)
+![](READMEImages/histOptimized400.png)
+![](READMEImages/histArrays400.png)
+
 Посчитаем случайную погрешность: $\sigma = \sqrt{\frac{\sum x_{m}^2-x_i^2}{N(N-1)}}$
 
 $\sigma_{nai}=1\cdot 10^{-5}$
