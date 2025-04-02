@@ -121,55 +121,46 @@ enum ErrorCodes MandelbrotIntrinsics(int* PixelSet, const int ScreenX, const int
     return MODULE_SUCCESS;   
 }
 
+#define ARRAY_CYCLE(statement) for(int i = 0; i < 4; i++) statement;
+
 enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber,
                                  float step, int CenterX, int CenterY, const float BorderRadius)
-{ 
-    float Y[4] = {};
+{
     float X[4] = {};
     float x0[4] = {};
+    float Y[4] = {};
     float xx[4] = {};
     float yy[4] = {};
     float xy[4] = {};
-
+    int mask[4] = {};
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
         float y0 = ((float)(CenterY - yPixels)) * step;
-
+        
         for(int xPixels = 0; xPixels < ScreenX; xPixels += 4)
         {
-            int mask[4] = {1, 1, 1, 1};
-            for(int i = 0; i < 4; i++) X[i] = ((float)(xPixels - CenterX + i)) * step;
-            for(int i = 0; i < 4; i++) Y[i] = y0;
-            for(int i = 0; i < 4; i++) x0[i] = X[i];
+            ARRAY_CYCLE(X[i] = ((float)(xPixels - CenterX + i)) * step)
+            ARRAY_CYCLE(Y[i] = y0)
+            ARRAY_CYCLE(x0[i] = X[i])
 
             for(int j = 0; j < ProbeNumber; j++)
             {
-                for(int i = 0; i < 4; i++) xx[i] = X[i] * X[i];
-                //float xx = X*X;
-                for(int i = 0; i < 4; i++) yy[i] = Y[i] * Y[i];
-                //float yy = Y*Y;
-                for(int i = 0; i < 4; i++) xy[i] = X[i] * Y[i];
-                //float xy = X*Y;
+                int Probes[4] = {};
 
-                for(int i = 0; i < 4; i++)
-                {
-                    if(xx[i] + yy[i] > BorderRadius)
-                    {
-                        mask[i] = 0;
-                    }
-                    else
-                    {
-                        PixelSet[ScreenX * yPixels + xPixels + i] += 1;
-                    }
-                }
-
-                if((mask[0] + mask[1] + mask[2] + mask[3]) == 0)
+                ARRAY_CYCLE(xx[i] = X[i] * X[i])
+                ARRAY_CYCLE(yy[i] = Y[i] * Y[i])
+                ARRAY_CYCLE(xy[i] = X[i] * Y[i])
+                ARRAY_CYCLE(mask[i] = ((xx[i] + yy[i]) < BorderRadius))
+                ARRAY_CYCLE(Probes[i] += mask[i])
+                int m = 0;
+                ARRAY_CYCLE(m += mask[i])
+                if(m == 0)
                 {
                     break;
                 }
-
-                for(int i = 0; i < 4; i++) X[i] = xx[i] - yy[i] + x0[i];
-                for(int i = 0; i < 4; i++) Y[i] = 2 * xy[i] + y0;
+        
+                ARRAY_CYCLE(X[i] = xx[i] - yy[i] + x0[i])
+                ARRAY_CYCLE(Y[i] = 2 * xy[i] + y0)
             }
         }
     }

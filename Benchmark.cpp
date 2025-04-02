@@ -10,7 +10,7 @@
 const int MAX_DATA_STRING_LENGTH = 10;
 
 
-enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized)
+enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized, FILE* fpPlotArrays)
 {
     if(fpData == NULL)
     {
@@ -125,7 +125,7 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     "\n\nplt.hist(data[1:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
     "plt.grid(axis='y', linestyle='--')\n"
     "plt.title('Latency distribution (raw)')\n"
-    "plt.xlabel('Latency')\n"
+    "plt.xlabel('Times latency appeared')\n"
     "plt.ylabel('Quantity')\n"
     "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber, params.OptimizedPlotFname);
 
@@ -136,8 +136,18 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     "plt.grid(axis='y', linestyle='--')\n"
     "plt.title('Latency distribution (optimized)')\n"
     "plt.xlabel('Latency')\n"
-    "plt.ylabel('Quantity')\n"
+    "plt.ylabel('Times latency appeared')\n"
     "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber + 1, 2 * params.TestNumber, params.OptimizedPlotFname);
+
+
+    fprintf(fpPlotArrays, "import matplotlib.pyplot as plt\n\nwith open('%s.dat', 'r') as f:\n"
+    "   data = [float(line.strip()) for line in f]\n"
+    "\n\nplt.hist(data[%d:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
+    "plt.grid(axis='y', linestyle='--')\n"
+    "plt.title('Latency distribution (arrays)')\n"
+    "plt.xlabel('Latency')\n"
+    "plt.ylabel('Times latency appeared')\n"
+    "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber + 1, 2 * params.TestNumber, params.ArraysPlotFname);
    
 
     free(LatencyDataArrayOptimized);

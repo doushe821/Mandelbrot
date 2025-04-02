@@ -20,9 +20,15 @@ SANITIZER_FLAGS=-fsanitize=address,alignment,bool,bounds,enum,float-cast-overflo
 CFLAGS_RELEASE=-D _NDEBUG
 LFLAGS= -lSDL2
 
+ifeq ($(COMPILER), clang)
+	CC=clang
+else
+	CC=gcc
+endif
+
 TARGET = release
 ifeq ($(TARGET), release)
-	CFLAGS=-O2 -ffast-math -mavx2 -flto \
+	CFLAGS=-O2 -mavx2 -flto \
 else
 	CFLAGS=-O2 -ffast-math -mavx2 \
 	-ggdb3 -std=c++17 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
@@ -61,6 +67,8 @@ $(OBJECTS) : $(OUT_O_DIR)/%.o : %.cpp
 $(DEPS) : $(OUT_O_DIR)/%.d : %.cpp
 	@mkdir -p $(@D)
 	@$(CC) -E $(CFLAGS) $< -MM -MT $(@:.d=.o) > $@
+
+include $(DEPS)
 
 .PHONY clean:
 	rm -rf *.o l
