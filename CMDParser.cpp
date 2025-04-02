@@ -172,11 +172,14 @@ enum ErrorCodes FileNamesInit(RunParameters* params)
     char pnString[MAX_PROBE_NUMBER_DIGITS] = {};
     itoa(params->ProbeNumber, pnString);
 
-    char RawFname[MANDELBROT_FILENAME_MAX] = "histRaw";
+    char NaiveFname[MANDELBROT_FILENAME_MAX] = "histNaive";
     char OptFname[MANDELBROT_FILENAME_MAX] = "histOptimized";
+    char ArraysFname[MANDELBROT_FILENAME_MAX] = "histArrays";
 
-    char RawFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+    char NaiveFP[MANDELBROT_FILENAME_MAX] = "Plots/";
     char OptFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+    char ArraysFP[MANDELBROT_FILENAME_MAX] = "Plots/";
+
 
 
     strcat(InfoFname, pnString);
@@ -193,22 +196,30 @@ enum ErrorCodes FileNamesInit(RunParameters* params)
     strncpy(params->DataFnameFullPath, DataFP, MANDELBROT_FILENAME_MAX);
     strncpy(params->InfoFnameFullPath, InfoFP, MANDELBROT_FILENAME_MAX);
 
-    strcat(RawFP, RawFname);
-    strcat(RawFP, pnString);
-    strcat(RawFP, pyExt);
+    strcat(NaiveFP, NaiveFname);
+    strcat(NaiveFP, pnString);
+    strcat(NaiveFP, pyExt);
 
     strcat(OptFP, OptFname);
     strcat(OptFP, pnString);
     strcat(OptFP, pyExt);
 
+    strcat(ArraysFP, ArraysFname);
+    strcat(ArraysFP, pnString);
+    strcat(ArraysFP, pyExt); 
+
     strncpy(params->OptimizedPyFname, OptFP, MANDELBROT_FILENAME_MAX);
-    strncpy(params->RawPyFname, RawFP, MANDELBROT_FILENAME_MAX);
+    strncpy(params->NaivePyFname, NaiveFP, MANDELBROT_FILENAME_MAX);
+    strncpy(params->ArraysPyFname, ArraysFP, MANDELBROT_FILENAME_MAX);
 
-    strcat(RawFname, pnString);
+    strcat(NaiveFname, pnString);
     strcat(OptFname, pnString);
+    strcat(ArraysFname, pnString);
 
-    strncpy(params->RawPlotFname, RawFname, MANDELBROT_FILENAME_MAX);
+
+    strncpy(params->NaivePlotFname, NaiveFname, MANDELBROT_FILENAME_MAX);
     strncpy(params->OptimizedPlotFname, OptFname, MANDELBROT_FILENAME_MAX);
+    strncpy(params->ArraysPlotFname, ArraysFname, MANDELBROT_FILENAME_MAX);
 
     return MODULE_SUCCESS;
 

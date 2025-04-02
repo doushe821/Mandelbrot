@@ -21,10 +21,13 @@ struct RunParameters
 
     bool GraphicsFlag;
 
-    char RawPyFname[MANDELBROT_FILENAME_MAX];
-    char RawPlotFname[MANDELBROT_FILENAME_MAX];
+    char NaivePyFname[MANDELBROT_FILENAME_MAX];
+    char NaivePlotFname[MANDELBROT_FILENAME_MAX];
     char OptimizedPyFname[MANDELBROT_FILENAME_MAX];
     char OptimizedPlotFname[MANDELBROT_FILENAME_MAX];
+    char ArraysPyFname[MANDELBROT_FILENAME_MAX];
+    char ArraysPlotFname[MANDELBROT_FILENAME_MAX];
+    
 
     char InfoFname[MANDELBROT_FILENAME_MAX];
     char DataFname[MANDELBROT_FILENAME_MAX];

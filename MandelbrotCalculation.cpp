@@ -12,14 +12,12 @@
 
 enum ErrorCodes MandelbrotNaive(int* PixelSet, const int ScreenX, const int ScreenY, const int ProbeNumber,
                                 float step, int CenterX, int CenterY, const float BorderRadius)
-{ // TODO Rename to naive and change return value  DONE
+{
     for(int yPixels = 0; yPixels < ScreenY; yPixels++)
     {
         float Y = ((float)(CenterY - yPixels)) * step;
         float y0 = Y;
         // TODO Functions to increase readability 
-        // TODO add -ffast-math DONE
-        // TODO linktime optimizations (to inline functions from different modules) DONE
         for(int xPixels = 0; xPixels < ScreenX; xPixels++)
         {
         

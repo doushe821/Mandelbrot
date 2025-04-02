@@ -37,10 +37,11 @@ int main(int argc, char** argv)
 
         FILE* fpData = NULL;
         FILE* fpInfo = NULL;
-        FILE* fpPlotRaw = NULL;
+        FILE* fpPlotNaive = NULL;
         FILE* fpPlotOpt = NULL;
+        FILE* fpPlotArrays = NULL;
 
-        fpData = fopen(params.DataFnameFullPath, "w+b"); // TODO error parser DONE
+        fpData = fopen(params.DataFnameFullPath, "w+b"); 
         if(fpData == NULL)
         {
             fprintf(stderr, "Failed to open data file\n");
@@ -52,11 +53,11 @@ int main(int argc, char** argv)
             fprintf(stderr, "Failed to open info file\n");
             goto InfoFileFail;       
         }
-        fpPlotRaw = fopen(params.RawPyFname, "w+b");
-        if(fpPlotRaw == NULL)
+        fpPlotNaive = fopen(params.NaivePyFname, "w+b");
+        if(fpPlotNaive == NULL)
         {
             fprintf(stderr, "Failed to open naive plot file\n");
-            goto RawPlotFail;       
+            goto NaivePlotFail;       
         }
         fpPlotOpt = fopen(params.OptimizedPyFname, "w+b");
         if(fpPlotOpt == NULL)
@@ -64,12 +65,19 @@ int main(int argc, char** argv)
             fprintf(stderr, "Failed to open instrinsics plot file\n");
             goto OptPlotFail;       
         }
+        fpPlotArrays = fopen(params.ArraysPyFname, "w+b");
+        if(fpPlotArrays == NULL)
+        {
+            fprintf(stderr, "Failed to open instrinsics plot file\n");
+            goto ArraysPlotFail;       
+        }
         
-        ErrorParser(Benchmark(params, fpData, fpInfo, fpPlotRaw, fpPlotOpt)); // TODO rename DONE
+        ErrorParser(Benchmark(params, fpData, fpInfo, fpPlotNaive, fpPlotOpt, fpPlotArrays)); 
 
-        fclose(fpPlotOpt);
-        OptPlotFail: fclose(fpPlotRaw);  
-        RawPlotFail: fclose(fpInfo);
+        fclose(fpPlotArrays);
+        ArraysPlotFail: fclose(fpPlotOpt);
+        OptPlotFail: fclose(fpPlotNaive);  
+        NaivePlotFail: fclose(fpInfo);
         InfoFileFail: fclose(fpData);
     }
 

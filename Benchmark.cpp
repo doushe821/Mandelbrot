@@ -36,19 +36,21 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     {
         return ZERO_CPU_FREQUENCY;
     }
-    double* LatencyDataArrayRaw = (double*)calloc((size_t)params.TestNumber, sizeof(double));
-    if(LatencyDataArrayRaw == NULL)
+    double* LatencyDataArrayNaive = (double*)calloc((size_t)params.TestNumber, sizeof(double));
+    if(LatencyDataArrayNaive == NULL)
     {
         return ALLOCATION_FAILURE;
     }
     double* LatencyDataArrayOptimized = (double*)calloc((size_t)params.TestNumber, sizeof(double));
     if(LatencyDataArrayOptimized == NULL)
     {
+        free(LatencyDataArrayNaive);
         return ALLOCATION_FAILURE;
     }
     double* LatencyDataArrayArrays = (double*)calloc((size_t)params.TestNumber, sizeof(double));
     if(LatencyDataArrayArrays == NULL)
     {
+        free(LatencyDataArrayArrays);
         return ALLOCATION_FAILURE;  
     }
 
@@ -62,18 +64,28 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
         ScreenArea += sizeof(__m256i) - ScreenArea % sizeof(__m256i);
     }
     int32_t* PixelSet = (int*)aligned_alloc(sizeof(__m256i), (size_t)params.ScreenX * (size_t)params.ScreenY * sizeof(int));
+    
+    if(PixelSet == NULL)
+    {
+        free(LatencyDataArrayArrays);
+        free(LatencyDataArrayOptimized);
+        free(LatencyDataArrayNaive);
+    
+        return ALLOCATION_FAILURE;
+    }
 
     unsigned long long start = 0;
     unsigned long long end = 0;
 
+    u_int32_t TSC_AUX_VALUE_STORAGE = 0;
     for(int i = 0; i < params.TestNumber; i++)
     {
-        start = _rdtsc(); 
+        start = __rdtscp(&TSC_AUX_VALUE_STORAGE); 
         MandelbrotNaive(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
         end = _rdtsc();
 
         unsigned long long DeltaClocks = end - start;
-        LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
+        LatencyDataArrayNaive[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
         ClocksRaw += DeltaClocks;
 
         start = _rdtsc();
@@ -105,15 +117,27 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     __TIME__, params.CPUFrequency, params.TestNumber, params.ProbeNumber, RawLatency, RawLatency / params.TestNumber,
     OptimizedLatency, OptimizedLatency / params.TestNumber, (double)ClocksRaw / (double)ClocksOptimized, ArraysLatency);
 
-    char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)params.TestNumber * 2, sizeof(char*));
+    char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)params.TestNumber * 3, sizeof(char*));
+    if(DataBuffer == NULL)
+    {
+        free(LatencyDataArrayArrays);
+        free(LatencyDataArrayNaive);
+        free(LatencyDataArrayOptimized);
+        return ALLOCATION_FAILURE;
+    }
+
     int lastPrinted = 0;
     for(int i = 0; i < params.TestNumber; i++)
     {
-        lastPrinted += sprintf(DataBuffer + lastPrinted, "%.6lg\n",LatencyDataArrayRaw[i]);
+        lastPrinted += sprintf(DataBuffer + lastPrinted, "%.6lg\n",LatencyDataArrayNaive[i]);
     }
     for(int i = 0; i < params.TestNumber; i++)
     {
         lastPrinted += sprintf(DataBuffer + lastPrinted, "%.6lg\n", LatencyDataArrayOptimized[i]);
+    }
+    for(int i = 0; i < params.TestNumber; i++)
+    {
+        lastPrinted += sprintf(DataBuffer + lastPrinted, "%.6lg\n", LatencyDataArrayArrays[i]);
     }
 
     fwrite(DataBuffer, sizeof(char), strlen(DataBuffer), fpData);
@@ -124,7 +148,7 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     "   data = [float(line.strip()) for line in f]\n"
     "\n\nplt.hist(data[1:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
     "plt.grid(axis='y', linestyle='--')\n"
-    "plt.title('Latency distribution (raw)')\n"
+    "plt.title('Latency distribution (naive)')\n"
     "plt.xlabel('Times latency appeared')\n"
     "plt.ylabel('Quantity')\n"
     "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber, params.OptimizedPlotFname);
@@ -147,11 +171,10 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     "plt.title('Latency distribution (arrays)')\n"
     "plt.xlabel('Latency')\n"
     "plt.ylabel('Times latency appeared')\n"
-    "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber + 1, 2 * params.TestNumber, params.ArraysPlotFname);
+    "plt.savefig('%s.png', dpi = 300)", params.DataFname, 2 * params.TestNumber + 1, 3 * params.TestNumber, params.ArraysPlotFname);
    
-
     free(LatencyDataArrayOptimized);
-    free(LatencyDataArrayRaw);
+    free(LatencyDataArrayNaive);
     free(LatencyDataArrayArrays);
 
     return MODULE_SUCCESS;

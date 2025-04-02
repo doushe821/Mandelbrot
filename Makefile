@@ -22,13 +22,15 @@ LFLAGS= -lSDL2
 
 ifeq ($(COMPILER), clang)
 	CC=clang
+else ifeq ($(COMPILER), g++)
+	CC=g++
 else
 	CC=gcc
 endif
 
 TARGET = release
 ifeq ($(TARGET), release)
-	CFLAGS=-O2 -mavx2 -flto \
+	CFLAGS=-O2 -mavx2 -flto -ffast-math\
 else
 	CFLAGS=-O2 -ffast-math -mavx2 \
 	-ggdb3 -std=c++17 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
