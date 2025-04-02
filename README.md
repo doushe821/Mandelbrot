@@ -69,7 +69,7 @@ for(int yPixels = 0; yPixels < ScreenY; yPixels++)
 ```
 
 ***2. Версия с интринсиками***
-```сpp
+```cpp
 for(int yPixels = 0; yPixels < ScreenY; yPixels++)
 {
     yInitial = _mm256_set1_ps((float)yPixels);
@@ -163,42 +163,48 @@ for(int yPixels = 0; yPixels < ScreenY; yPixels++)
 
 **Характеристики ПК:** 
 Процессор: Intel(R) Pentium(R) Gold 7505 @ 2.00GHz (на время тестирования была зафиксирована частота 3.00GHz)
-ОЗУ: 7821040 KiB, частота 3200MHz
+ОЗУ: 7821040 KiB, частота 3200MHz. Ubuntu 24.04.
 
 **Инструкция по сборке:** Для версии 1 и 2 можно использовать любой из следующих компиляторов: gcc, g++, clang. Версию 3 необходимо компилировать только с clang. Необходим флаг линковщика -lSDL2 для работы SDL (Инструкция по установке библиотеки есть в их [репозитории](https://github.com/libsdl-org/SDL)). Флаги компилятора: -mavx2 для поддержки интринсиков, работающих с 256 битами, -O2 -ffast-math -flto для максимального ускорения.
 
 
-Latency - задержку будем считать с помощью функции _rdtsc(), возвращающей количество тактов, прошедшее с начала работы процессора. Разделив разность начального и конечного значения, возвращаемого _rdtsc(), на зафиксированную частоту процессора, получим задержку в секундах. **ВАЖНО:** даже при фиксированной с помощью cpupower частоте процессора, время
+Latency - задержку будем считать с помощью функции _rdtsc(), возвращающей количество тактов, прошедшее с начала работы процессора. Разделив разность начального и конечного значения, возвращаемого _rdtsc(), на зафиксированную частоту процессора, получим задержку в секундах. **ВАЖНО:** даже при фиксированной с помощью cpupower частоте процессора, рассчитанное  время может отличаться от реального, поэтому значения с гистограммы даются с точностью до множителя, намного более точной характеристикой было бы количество тактов, возвращаемое _rdtsc(), но оно не наглядно, поэтому на гистограммах приведена именно задержка.
 
 Код тестировщика:
 
 
 ```cpp
-unsigned long long start = 0;
-unsigned long long end = 0;
+    for(int i = 0; i < params.TestNumber; i++)
+    {
+        start = _rdtsc(); 
+        MandelbrotNaive(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
+        end = _rdtsc();
 
-for(int i = 0; i < TestNumber; i++)
-{
-    start = _rdtsc();
-    MandelbrotRaw(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
-    end = _rdtsc();
+        unsigned long long DeltaClocks = end - start;
+        LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
+        ClocksRaw += DeltaClocks;
 
-    unsigned long long DeltaClocks = end - start;
-    LatencyDataArrayRaw[i] = (double)(DeltaClocks) / (double)CPUfrequency;
-    ClocksRaw += DeltaClocks;
+        start = _rdtsc();
+        MandelbrotIntrinsics(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
+        end = _rdtsc();
 
-    start = _rdtsc();
-    MandelbrotOptimized(PixelSet, ScreenX, ScreenY, ProbeNumber, step, CenterX, CenterY, BorderRadius);
-    end = _rdtsc();
+        DeltaClocks = end - start;
+        LatencyDataArrayOptimized[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
+        ClocksOptimized += DeltaClocks; 
 
-    DeltaClocks = end - start;
-    LatencyDataArrayOptimized[i] = (double)(DeltaClocks) / (double)CPUfrequency;
-    ClocksOptimized += DeltaClocks; 
-}
+
+        start = _rdtsc();
+        MandelbrotArrays(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
+        end = _rdtsc();
+
+        DeltaClocks = end - start;
+        LatencyDataArrayArrays[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
+        ClocksArrays += DeltaClocks; 
+    }
 ```
 Результаты программа сохранит в файл data.dat, краткую сводку о тестировании в info.txt, графики в histOptimized.py и histRaw.py (их нужно будет запустить, чтобы получить png графики). 
 
-Частоту процессора фиксируем с помощью cpupower (пример для юбунты):
+Частоту процессора фиксируем с помощью cpupower (пример для Ubuntu):
 ```
 sudo spupower frequency-set -u 3.0 Ghz
 sudo spupower frequency-set -u 3.0 Ghz
@@ -206,13 +212,15 @@ sudo spupower frequency-set -u 3.0 Ghz
 
 Получаем:
 ```
-01:35:31
+01:48:56
 CPU frequency = 3000000000
 Number of tests = 1000
+Number of probes for each dot: 400
 Short summary:
-Raw latency = 60.7409; average raw latency = 0.0607409
-Optimized latency = 8.5966; average optimized latency = 0.0085966
-Relative Performance increase: 7.06139
+Naive latency = 197.833; average naive latency = 0.197833
+Optimized latency = 27.3561; average optimized latency = 0.0273561
+Relative Performance increase: 7.23178
+Arrays latency: 60.6951
 ```
 
 Гистограммы: 
@@ -221,19 +229,23 @@ Relative Performance increase: 7.06139
 ![](READMEImages/histoRaw.png)
 ![](READMEImages/histoOptimized.png)
 
-$\sigma_{raw}=1\cdot 10^{-5}$
+$\sigma_{nai}=1\cdot 10^{-5}$
 
 $\sigma_{opt}=9\cdot 10^{-5}$
 
+$\sigma_{arr}=9\cdot 10^{-5}$
+
 Значения задержки:
 
-$L_{Raw}=(0.06074\pm0.00009)$ с
+$L_{nai}=(0.06074\pm0.00009)$ с
 
-$L_{Raw}=(0.00860\pm0.00001)$ с
+$L_{opt}=(0.00860\pm0.00001)$ с
+
+$L_{arr}=(0.00860\pm0.00001)$ с
 
 Теперь посмотрим, как зависит прирост производительности от количества рассматриваемых членов последовательности (будем выполнять по 200 тестов на частоте процессора 3GHz):
 
 
-
+(сравнение проводилось только для наивной и интринсик-версии)
 ## Выводы
-С помощью архитектурных оптимизаций удалось ускорить вычисления в 7 раз.
+С помощью архитектурных оптимизаций удалось ускорить более чем в 7 раз.
