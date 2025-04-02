@@ -212,40 +212,39 @@ sudo spupower frequency-set -u 3.0 Ghz
 
 Получаем:
 ```
-01:48:56
+02:08:44
 CPU frequency = 3000000000
 Number of tests = 1000
 Number of probes for each dot: 400
 Short summary:
-Naive latency = 197.833; average naive latency = 0.197833
-Optimized latency = 27.3561; average optimized latency = 0.0273561
-Relative Performance increase: 7.23178
-Arrays latency: 60.6951
+Naive latency = 196.692; average naive latency = 0.196692
+Optimized latency = 27.1817; average optimized latency = 0.0271817
+Relative Performance increase: 7.23618
+Arrays latency: 60.2322
 ```
 
 Гистограммы: 
 
 Посчитаем случайную погрешность: $\sigma = \sqrt{\frac{\sum x_{m}^2-x_i^2}{N(N-1)}}$
-![](READMEImages/histoRaw.png)
-![](READMEImages/histoOptimized.png)
 
 $\sigma_{nai}=1\cdot 10^{-5}$
 
 $\sigma_{opt}=9\cdot 10^{-5}$
 
-$\sigma_{arr}=9\cdot 10^{-5}$
+$\sigma_{arr}=2\cdot 10^{-5}$
 
-Значения задержки:
+Значения задержки (средние):
 
-$L_{nai}=(0.06074\pm0.00009)$ с
+$L_{nai}=(0.19669\pm0.00009)$ с
 
-$L_{opt}=(0.00860\pm0.00001)$ с
+$L_{opt}=(0.02718\pm0.00001)$ с
 
-$L_{arr}=(0.00860\pm0.00001)$ с
+$L_{arr}=(0.06023\pm0.00002)$ с
 
 Теперь посмотрим, как зависит прирост производительности от количества рассматриваемых членов последовательности (будем выполнять по 200 тестов на частоте процессора 3GHz):
 
-
+![](READMEImages/GigaTestResult.png)
+Из графика следует выкинуть первые 3 точки, как выходящие за 3-$\sigma$, тогда мы получим ожидаемую линейную зависимость.
 (сравнение проводилось только для наивной и интринсик-версии)
 ## Выводы
 С помощью архитектурных оптимизаций удалось ускорить более чем в 7 раз.
