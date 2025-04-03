@@ -252,13 +252,17 @@ $L_{arr}=(0.06023\pm0.00002)$ с
 
 **clang -O3:**
 
-![]()
+![](READMEImages/histNaive400clangO3.png)
+
+![](READMEImages/histOptimized400clangO3.png)
+
+![](READMEImages/histArrays400clangO3.png)
 
 $L_{nai} = (0.19 \pm 0.02)$ с
 
 $L_{opt} = (0.027 \pm 0.003)$ с
 
-$L_{arr} = (0.0552\pm 0.003)$ с
+$L_{arr} = (0.0552\pm 0.008)$ с
 
 **gcc -O2:**
 
