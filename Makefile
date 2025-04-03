@@ -49,7 +49,7 @@ else ifeq($(TARGET), debug)
 endif
 
 
-SOURCES=main.cpp MandelbrotCalculation.cpp Benchmark.cpp Visualizer.cpp ErrorParser.cpp CMDParser.cpp
+SOURCES=main.cpp MandelbrotCalculation.cpp Benchmark.cpp ErrorParser.cpp CMDParser.cpp
 OBJECTS:=$(addprefix $(OUT_O_DIR)/,$(SOURCES:.cpp=.o))
 DEPS=$(OBJECTS:.o=.d)
 

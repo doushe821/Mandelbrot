@@ -81,10 +81,10 @@ int main(int argc, char** argv)
         InfoFileFail: fclose(fpData);
     }
 
-    DataFileFail: if(params.GraphicsFlag)
-    {
-        ErrorParser(DisplayPixelsSDL(params.ScreenX, params.ScreenY, params.ProbeNumber));
-    }
+  //  DataFileFail: if(params.GraphicsFlag)
+  //  {
+  //      ErrorParser(DisplayPixelsSDL(params.ScreenX, params.ScreenY, params.ProbeNumber));
+  //  }
 
-    return 0;
+    DataFileFail: return 0;
 }

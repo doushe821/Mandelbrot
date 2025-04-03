@@ -183,7 +183,7 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
         "plt.title('Latency distribution (arrays)')\n"
         "plt.xlabel('Latency')\n"
         "plt.ylabel('Times latency appeared')\n"
-        "plt.savefig('%s.png', dpi = 300)", params.DataFname, 2* params.TestNumber + 1, params.TestNumber * 3, params.ProbeNumber, 2* params.TestNumber + 1, params.TestNumber * 3, params.ProbeNumber, 2 * params.ProbeNumber - 1, params.TestNumber + 1, 3 * params.TestNumber, params.ArraysPlotFname);
+        "plt.savefig('%s.png', dpi = 300)", params.DataFname, 2* params.TestNumber + 1, params.TestNumber * 3, params.ProbeNumber, 2 * params.TestNumber + 1, params.TestNumber * 3, params.ProbeNumber, params.ProbeNumber - 1, 2 * params.TestNumber + 1, 3 * params.TestNumber, params.ArraysPlotFname);
     
    
     free(LatencyDataArrayOptimized);
