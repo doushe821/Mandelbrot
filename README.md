@@ -264,6 +264,24 @@ $L_{opt} = (0.027 \pm 0.003)$ с
 
 $L_{arr} = (0.0552\pm 0.008)$ с
 
+**gcc -O2:**
+
+![](READMEImages/histNaive400gcc02.png)
+
+![](READMEImages/histOptimized400gcc02.png)
+
+![](READMEImages/histArrays400gcc02.png)
+
+$L_{nai} =  (0.20\pm 0.02)$ с
+
+$L_{opt} = (0.027\pm 0.003)$ c
+
+$L_{arr} = (0.05686 \pm 0.005)$ с
+
+**gcc -O3:**
+
+
+
 Теперь посмотрим, как зависит прирост производительности от количества рассматриваемых членов последовательности (будем выполнять по 200 тестов на частоте процессора 3GHz):
 
 ![](READMEImages/GigaTestResult.png)
