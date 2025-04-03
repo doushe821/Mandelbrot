@@ -7,6 +7,7 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
+
 #include "Visualizer.h"
 #include "ErrorParser.h"
 
@@ -140,10 +141,11 @@ enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int Scr
             ARRAY_CYCLE(X[i] = ((float)(xPixels - CenterX + i)) * step)
             ARRAY_CYCLE(Y[i] = y0)
             ARRAY_CYCLE(x0[i] = X[i])
-
+            int segment = ScreenX * yPixels + xPixels;
+            int Probes[4] = {};
             for(int j = 0; j < ProbeNumber; j++)
             {
-                int Probes[4] = {};
+
 
                 ARRAY_CYCLE(xx[i] = X[i] * X[i])
                 ARRAY_CYCLE(yy[i] = Y[i] * Y[i])
@@ -160,8 +162,8 @@ enum ErrorCodes MandelbrotArrays(int* PixelSet, const int ScreenX, const int Scr
                 ARRAY_CYCLE(X[i] = xx[i] - yy[i] + x0[i])
                 ARRAY_CYCLE(Y[i] = 2 * xy[i] + y0)
             }
+            ARRAY_CYCLE(PixelSet[segment + i] = Probes[i]);
         }
     }
-    //DisplayPixelsSDL(ScreenX, ScreenY, ProbeNumber);
     return MODULE_SUCCESS;
 }

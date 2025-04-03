@@ -17,21 +17,23 @@ DED32_FLAGS=-ggdb3 -std=c++17 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizat
 
 SANITIZER_FLAGS=-fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr 
 
-CFLAGS_RELEASE=-D _NDEBUG
-LFLAGS= -lSDL2
+LFLAGS=-lSDL2
 
 ifeq ($(COMPILER), clang)
 	CC=clang
-else ifeq ($(COMPILER), g++)
-	CC=g++
-else
+else ifeq ($(COMPILER), gcc)
 	CC=gcc
+else
+	CC=g++
 endif
 
-TARGET = release
-ifeq ($(TARGET), release)
-	CFLAGS=-O2 -mavx2 -flto -ffast-math\
-else
+TARGET=releaseO2
+
+ifeq ($(TARGET), releaseO2)
+	CFLAGS=-O2 -mavx2 -flto -ffast-math
+else ifeq($(TARGET), releaseO3)
+	CFLAGS=-O3 -mavx2 -mavx -flto -ffast-math
+else ifeq($(TARGET), debug)
 	CFLAGS=-O2 -ffast-math -mavx2 \
 	-ggdb3 -std=c++17 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
 	-Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts \

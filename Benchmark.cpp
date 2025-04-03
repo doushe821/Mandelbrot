@@ -10,7 +10,7 @@
 const int MAX_DATA_STRING_LENGTH = 10;
 
 
-enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotRaw, FILE* fpPlotOptimized, FILE* fpPlotArrays)
+enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE* fpPlotNaive, FILE* fpPlotOptimized, FILE* fpPlotArrays)
 {
     if(fpData == NULL)
     {
@@ -20,9 +20,9 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     {
         return FP_INFO_NULL;
     }
-    if(fpPlotRaw == NULL)
+    if(fpPlotNaive == NULL)
     {
-        return FP_PLOT_RAW_NULL;
+        return FP_PLOT_NAIVE_NULL;
     }
     if(fpPlotOptimized == NULL)
     {
@@ -54,7 +54,7 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
         return ALLOCATION_FAILURE;  
     }
 
-    unsigned long long ClocksRaw = 0;
+    unsigned long long ClocksNaive = 0;
     unsigned long long ClocksOptimized = 0;
     unsigned long long ClocksArrays = 0;
 
@@ -86,7 +86,7 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
 
         unsigned long long DeltaClocks = end - start;
         LatencyDataArrayNaive[i] = (double)(DeltaClocks) / (double)params.CPUFrequency;
-        ClocksRaw += DeltaClocks;
+        ClocksNaive += DeltaClocks;
 
         start = _rdtsc();
         MandelbrotIntrinsics(PixelSet, params.ScreenX, params.ScreenY, params.ProbeNumber, params.step, params.CenterX, params.CenterY, params.BorderRadius);
@@ -108,14 +108,14 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
 
     free(PixelSet);
 
-    double RawLatency = (double)ClocksRaw / (double)params.CPUFrequency;
+    double NaiveLatency = (double)ClocksNaive / (double)params.CPUFrequency;
     double OptimizedLatency = (double)ClocksOptimized / (double)params.CPUFrequency; 
     double ArraysLatency = (double)ClocksArrays / (double)params.CPUFrequency; 
 
     fprintf(fpInfo, "%s\nCPU frequency = %llu\nNumber of tests = %d\nNumber of probes for each dot: %d\nShort summary:\nNaive latency = %lg; average naive latency = %lg\n"
     "Optimized latency = %lg; average optimized latency = %lg\nRelative Performance increase: %lg\nArrays latency: %lg\n" , 
-    __TIME__, params.CPUFrequency, params.TestNumber, params.ProbeNumber, RawLatency, RawLatency / params.TestNumber,
-    OptimizedLatency, OptimizedLatency / params.TestNumber, (double)ClocksRaw / (double)ClocksOptimized, ArraysLatency);
+    __TIME__, params.CPUFrequency, params.TestNumber, params.ProbeNumber, NaiveLatency, NaiveLatency / params.TestNumber,
+    OptimizedLatency, OptimizedLatency / params.TestNumber, (double)ClocksNaive / (double)ClocksOptimized, ArraysLatency);
 
     char* DataBuffer = (char*)calloc((size_t)(MAX_DATA_STRING_LENGTH) * (size_t)params.TestNumber * 3, sizeof(char*));
     if(DataBuffer == NULL)
@@ -144,34 +144,47 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
 
     free(DataBuffer);
 
-    fprintf(fpPlotRaw, "import matplotlib.pyplot as plt\n\nwith open('%s.dat', 'r') as f:\n"
+    fprintf(fpPlotNaive, "import matplotlib.pyplot as plt\nimport numpy as np\n\nwith open('%s.dat', 'r') as f:\n"
     "   data = [float(line.strip()) for line in f]\n"
+    "average = np.sum(data[1:%d])/%d\n"
+    "disp = np.sum((average - data[1:%d])**2)\n"
+    "sigma = np.sqrt(disp / (%d * %d))\n"
+    "print(sigma)\n"
     "\n\nplt.hist(data[1:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
     "plt.grid(axis='y', linestyle='--')\n"
     "plt.title('Latency distribution (naive)')\n"
     "plt.xlabel('Times latency appeared')\n"
     "plt.ylabel('Quantity')\n"
-    "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber, params.OptimizedPlotFname);
+    "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber, params.ProbeNumber, params.TestNumber, params.ProbeNumber, params.ProbeNumber - 1, params.TestNumber, params.NaivePlotFname);
 
 
-    fprintf(fpPlotOptimized, "import matplotlib.pyplot as plt\n\nwith open('%s.dat', 'r') as f:\n"
+    fprintf(fpPlotOptimized, "import matplotlib.pyplot as plt\nimport numpy as np\n\nwith open('%s.dat', 'r') as f:\n"
     "   data = [float(line.strip()) for line in f]\n"
+    "average = np.sum(data[%d:%d])/%d\n"
+    "disp = np.sum((average - data[%d:%d])**2)\n"
+    "sigma = np.sqrt(disp / (%d * %d))\n"
+    "print(sigma)\n"    
     "\n\nplt.hist(data[%d:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
     "plt.grid(axis='y', linestyle='--')\n"
     "plt.title('Latency distribution (optimized)')\n"
     "plt.xlabel('Latency')\n"
     "plt.ylabel('Times latency appeared')\n"
-    "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber + 1, 2 * params.TestNumber, params.OptimizedPlotFname);
+    "plt.savefig('%s.png', dpi = 300)", params.DataFname, params.TestNumber + 1, params.TestNumber * 2, params.ProbeNumber, params.TestNumber + 1, params.TestNumber * 2, params.ProbeNumber, params.ProbeNumber - 1, params.TestNumber + 1, 2 * params.TestNumber, params.OptimizedPlotFname);
 
 
-    fprintf(fpPlotArrays, "import matplotlib.pyplot as plt\n\nwith open('%s.dat', 'r') as f:\n"
-    "   data = [float(line.strip()) for line in f]\n"
-    "\n\nplt.hist(data[%d:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
-    "plt.grid(axis='y', linestyle='--')\n"
-    "plt.title('Latency distribution (arrays)')\n"
-    "plt.xlabel('Latency')\n"
-    "plt.ylabel('Times latency appeared')\n"
-    "plt.savefig('%s.png', dpi = 300)", params.DataFname, 2 * params.TestNumber + 1, 3 * params.TestNumber, params.ArraysPlotFname);
+    fprintf(fpPlotArrays, "import matplotlib.pyplot as plt\nimport numpy as np\n\nwith open('%s.dat', 'r') as f:\n"
+        "   data = [float(line.strip()) for line in f]\n"
+        "average = np.sum(data[%d:%d])/%d\n"
+        "disp = np.sum((average - data[%d:%d])**2)\n"
+        "sigma = np.sqrt(disp / (%d * %d))\n"
+        "print(sigma)\n"    
+        "\n\nplt.hist(data[%d:%d], bins = 30, color = 'blue', edgecolor = 'black', alpha = 0.7)\n"
+        "plt.grid(axis='y', linestyle='--')\n"
+        "plt.title('Latency distribution (arrays)')\n"
+        "plt.xlabel('Latency')\n"
+        "plt.ylabel('Times latency appeared')\n"
+        "plt.savefig('%s.png', dpi = 300)", params.DataFname, 2* params.TestNumber + 1, params.TestNumber * 3, params.ProbeNumber, 2* params.TestNumber + 1, params.TestNumber * 3, params.ProbeNumber, 2 * params.ProbeNumber - 1, params.TestNumber + 1, 3 * params.TestNumber, params.ArraysPlotFname);
+    
    
     free(LatencyDataArrayOptimized);
     free(LatencyDataArrayNaive);
