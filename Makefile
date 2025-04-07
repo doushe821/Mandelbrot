@@ -19,21 +19,15 @@ SANITIZER_FLAGS=-fsanitize=address,alignment,bool,bounds,enum,float-cast-overflo
 
 LFLAGS=-lSDL2
 
-ifeq ($(COMPILER), clang)
-	CC=clang
-else ifeq ($(COMPILER), gcc)
-	CC=gcc
-else
-	CC=g++
-endif
+CC?=clang
 
 TARGET=releaseO2
 
 ifeq ($(TARGET), releaseO2)
 	CFLAGS=-O2 -mavx2 -flto -ffast-math
-else ifeq($(TARGET), releaseO3)
+else ifeq ($(TARGET), releaseO3)
 	CFLAGS=-O3 -mavx2 -mavx -flto -ffast-math
-else ifeq($(TARGET), debug)
+else ifeq ($(TARGET), debug)
 	CFLAGS=-O2 -ffast-math -mavx2 \
 	-ggdb3 -std=c++17 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations \
 	-Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts \
@@ -49,7 +43,7 @@ else ifeq($(TARGET), debug)
 endif
 
 
-SOURCES=main.cpp MandelbrotCalculation.cpp Benchmark.cpp ErrorParser.cpp CMDParser.cpp
+SOURCES=main.cpp MandelbrotCalculation.cpp Benchmark.cpp ErrorParser.cpp CMDParser.cpp Visualizer.cpp
 OBJECTS:=$(addprefix $(OUT_O_DIR)/,$(SOURCES:.cpp=.o))
 DEPS=$(OBJECTS:.o=.d)
 

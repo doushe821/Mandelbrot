@@ -63,7 +63,8 @@ enum ErrorCodes Benchmark(RunParameters params, FILE* fpData, FILE* fpInfo, FILE
     {
         ScreenArea += sizeof(__m256i) - ScreenArea % sizeof(__m256i);
     }
-    int32_t* PixelSet = (int*)aligned_alloc(sizeof(__m256i), (size_t)params.ScreenX * (size_t)params.ScreenY * sizeof(int));
+
+    int32_t* PixelSet = (int*)aligned_alloc(sizeof(__m256i), (size_t)params.ScreenX * (size_t)params.ScreenY * sizeof(int)); 
     
     if(PixelSet == NULL)
     {
